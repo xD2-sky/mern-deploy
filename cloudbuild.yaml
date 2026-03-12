@@ -1,0 +1,10 @@
+steps:
+  - name: 'gcr.io/cloud-builders/gcloud'
+    args:
+      - compute
+      - ssh
+      - ecommerce-vm
+      - --zone=asia-south1-b
+      - --project=project-ce0e81d5-7ca0-4de1-9e6
+      - --tunnel-through-iap
+      - --command=cd /app/mern-deploy && git pull && sudo docker compose up --build -d
