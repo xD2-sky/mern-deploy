@@ -9,7 +9,7 @@ resource "google_compute_firewall" "allow_web" {
 
   allow {
     protocol = "tcp"
-    ports    = ["22", "80", "443", "${var.backend_port}"]
+    ports    = ["22", tostring(var.frontend_port), "443", tostring(var.backend_port)]
   }
 
   source_ranges = ["0.0.0.0/0"]
@@ -17,13 +17,13 @@ resource "google_compute_firewall" "allow_web" {
 
 resource "google_compute_instance" "vm" {
   name         = var.vm_name
-  machine_type = "e2-medium"
+  machine_type = var.machine_type
   zone         = var.zone
 
   boot_disk {
     initialize_params {
-      image = "ubuntu-os-cloud/ubuntu-2204-lts"
-      size  = 20
+      image = var.vm_image
+      size  = var.disk_size
     }
   }
 
@@ -39,29 +39,38 @@ resource "google_compute_instance" "vm" {
       echo "[$(date)] Startup script begin"
 
       apt-get update -y
-      apt-get install -y docker.io docker-compose-plugin git
+      apt-get install -y ca-certificates curl gnupg git
+
+      install -m 0755 -d /etc/apt/keyrings
+      curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+      chmod a+r /etc/apt/keyrings/docker.gpg
+      echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu $(. /etc/os-release && echo $VERSION_CODENAME) stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null
+
+      apt-get update -y
+      apt-get install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin
+
       systemctl enable docker
       systemctl start docker
 
-      mkdir -p /app
-      cd /app
+      mkdir -p ${var.clone_dir}
+      cd ${var.clone_dir}
 
       git clone https://github.com/${var.github_user}/${var.repo_deploy}.git
       git clone https://github.com/HuXn-WebDev/${var.repo_app}.git
 
-      cp -r /app/${var.repo_app}/backend  /app/${var.repo_deploy}/backend
-      cp -r /app/${var.repo_app}/frontend /app/${var.repo_deploy}/frontend
+      cp -r ${var.clone_dir}/${var.repo_app}/backend  ${var.app_dir}/backend
+      cp -r ${var.clone_dir}/${var.repo_app}/frontend ${var.app_dir}/frontend
 
-      cat > /app/${var.repo_deploy}/.env << ENV
-      MONGO_URI=${var.mongo_uri}
-      JWT_SECRET=${var.jwt_secret}
-      PAYPAL_CLIENT_ID=${var.paypal_client_id}
-      PORT=${var.backend_port}
-      NODE_ENV=production
-      ENV
+      cat > ${var.app_dir}/.env << ENV
+PORT=${var.backend_port}
+MONGO_URI=mongodb://${var.mongo_host}:${var.mongo_port}/${var.mongo_db_name}
+NODE_ENV=${var.node_env}
+JWT_SECRET=${var.jwt_secret}
+PAYPAL_CLIENT_ID=${var.paypal_client_id}
+ENV
 
-      cd /app/${var.repo_deploy}
-      sudo docker compose up --build -d
+      cd ${var.app_dir}
+      docker compose up --build -d
 
       echo "[$(date)] Startup script complete"
     SCRIPT
