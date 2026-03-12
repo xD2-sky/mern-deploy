@@ -58,8 +58,10 @@ resource "google_compute_instance" "vm" {
       git clone https://github.com/${var.github_user}/${var.repo_deploy}.git
       git clone https://github.com/HuXn-WebDev/${var.repo_app}.git
 
-      cp -r ${var.clone_dir}/${var.repo_app}/backend  ${var.app_dir}/backend
-      cp -r ${var.clone_dir}/${var.repo_app}/frontend ${var.app_dir}/frontend
+      # Copy entire app repo into backend build context (package.json is at root)
+      cp -r ${var.clone_dir}/${var.repo_app}/. ${var.app_dir}/backend/
+      # Copy only frontend folder into frontend build context
+      cp -r ${var.clone_dir}/${var.repo_app}/frontend/. ${var.app_dir}/frontend/
 
       cat > ${var.app_dir}/.env << ENV
 PORT=${var.backend_port}
