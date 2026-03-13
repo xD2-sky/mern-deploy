@@ -58,9 +58,7 @@ resource "google_compute_instance" "vm" {
       git clone https://github.com/${var.github_user}/${var.repo_deploy}.git
       git clone https://github.com/HuXn-WebDev/${var.repo_app}.git
 
-      # Copy entire app repo into backend build context (package.json is at root)
       cp -r ${var.clone_dir}/${var.repo_app}/. ${var.app_dir}/backend/
-      # Copy only frontend folder into frontend build context
       cp -r ${var.clone_dir}/${var.repo_app}/frontend/. ${var.app_dir}/frontend/
 
       cat > ${var.app_dir}/.env << ENV
@@ -83,4 +81,30 @@ ENV
   }
 
   tags = [var.vm_name]
+}
+
+resource "google_cloudbuild_trigger" "deploy_trigger" {
+  name     = "${var.vm_name}-deploy-trigger"
+  location = var.region
+
+  repository_event_config {
+    repository = "projects/${var.project_id}/locations/${var.region}/connections/${var.cloudbuild_connection}/repositories/${var.cloudbuild_repo}"
+    push {
+      branch = "^${var.branch_name}$"
+    }
+  }
+
+  filename = "cloudbuild.yaml"
+}
+
+resource "google_project_iam_member" "cloudbuild_iap" {
+  project = var.project_id
+  role    = "roles/iap.tunnelResourceAccessor"
+  member  = "serviceAccount:${var.project_number}@cloudbuild.gserviceaccount.com"
+}
+
+resource "google_project_iam_member" "cloudbuild_compute" {
+  project = var.project_id
+  role    = "roles/compute.osLogin"
+  member  = "serviceAccount:${var.project_number}@cloudbuild.gserviceaccount.com"
 }

@@ -121,3 +121,20 @@ variable "paypal_client_id" {
   sensitive   = true
   description = "PayPal client ID"
 }
+
+variable "cloudbuild_connection" {
+  type        = string
+  description = "Cloud Build connection name"
+  default     = "sanjay"
+}
+
+variable "cloudbuild_repo" {
+  type        = string
+  description = "Cloud Build linked repo name"
+  default     = "xD2-sky-mern-deploy"
+}
+
+variable "project_number" {
+  type        = string
+  description = "GCP Project Number"
+}
