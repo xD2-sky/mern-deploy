@@ -13,6 +13,20 @@ resource "google_compute_firewall" "allow_web" {
   }
 
   source_ranges = ["0.0.0.0/0"]
+  target_tags   = [var.vm_name]
+}
+
+resource "google_compute_firewall" "allow_iap" {
+  name    = "${var.vm_name}-allow-iap"
+  network = google_compute_network.vpc.name
+
+  allow {
+    protocol = "tcp"
+    ports    = ["22"]
+  }
+
+  source_ranges = ["35.235.240.0/20"]
+  target_tags   = [var.vm_name]
 }
 
 resource "google_compute_instance" "vm" {
@@ -38,33 +52,26 @@ resource "google_compute_instance" "vm" {
       exec >> /var/log/startup.log 2>&1
       echo "[$(date)] Startup script begin"
 
-      # ── Install Docker ──────────────────────────────────
       apt-get update -y
       apt-get install -y ca-certificates curl gnupg git
+
       install -m 0755 -d /etc/apt/keyrings
       curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg
       chmod a+r /etc/apt/keyrings/docker.gpg
       echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu $(. /etc/os-release && echo $VERSION_CODENAME) stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null
       apt-get update -y
       apt-get install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin
-      systemctl enable docker
-      systemctl start docker
 
-      # ── Clone Single Repo ───────────────────────────────
+      systemctl enable docker && systemctl start docker
+
       mkdir -p ${var.clone_dir}
       cd ${var.clone_dir}
       git clone https://github.com/${var.github_user}/${var.repo_deploy}.git
 
-      # ── Create .env ─────────────────────────────────────
-      cat > ${var.app_dir}/.env << ENV
-PORT=${var.backend_port}
-MONGO_URI=mongodb://${var.mongo_host}:${var.mongo_port}/${var.mongo_db_name}
-NODE_ENV=${var.node_env}
-JWT_SECRET=${var.jwt_secret}
-PAYPAL_CLIENT_ID=${var.paypal_client_id}
-ENV
+      cat > ${var.app_dir}/.env << 'ENVEOF'
+${var.env_file_content}
+ENVEOF
 
-      # ── Start App ───────────────────────────────────────
       cd ${var.app_dir}
       docker compose up --build -d
 

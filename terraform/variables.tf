@@ -1,127 +1,83 @@
 variable "project_id" {
   type        = string
-  description = "GCP Project ID"
+  description = "GCP project ID"
 }
 
 variable "project_number" {
   type        = string
-  description = "GCP Project Number"
+  description = "GCP project number"
 }
 
 variable "region" {
-  type        = string
-  description = "GCP Region"
-  default     = "asia-south1"
+  type    = string
+  default = "asia-south1"
 }
 
 variable "zone" {
-  type        = string
-  description = "GCP Zone"
-  default     = "asia-south1-b"
+  type    = string
+  default = "asia-south1-b"
 }
 
 variable "vm_name" {
-  type        = string
-  description = "VM instance name"
-  default     = "ecommerce-vm"
+  type    = string
+  default = "ecommerce-vm"
 }
 
 variable "machine_type" {
-  type        = string
-  description = "VM machine type"
-  default     = "e2-medium"
+  type    = string
+  default = "e2-medium"
 }
 
 variable "vm_image" {
-  type        = string
-  description = "VM boot disk image"
-  default     = "ubuntu-os-cloud/ubuntu-2204-lts"
+  type    = string
+  default = "ubuntu-os-cloud/ubuntu-2204-lts"
 }
 
 variable "disk_size" {
-  type        = number
-  description = "Boot disk size in GB"
-  default     = 20
+  type    = number
+  default = 20
 }
 
 variable "github_user" {
-  type        = string
-  description = "YOUR GitHub username"
+  type = string
 }
 
 variable "repo_deploy" {
-  type        = string
-  description = "YOUR deployment repo name — contains app code + Dockerfiles"
-  default     = "mern-deploy"
+  type    = string
+  default = "mern-deploy"
 }
 
 variable "app_dir" {
-  type        = string
-  description = "Directory where app runs on VM"
-  default     = "/app/mern-deploy"
+  type    = string
+  default = "/app/mern-deploy"
 }
 
 variable "clone_dir" {
-  type        = string
-  description = "Base directory for cloning repos"
-  default     = "/app"
+  type    = string
+  default = "/app"
 }
 
 variable "branch_name" {
-  type        = string
-  description = "GitHub branch to deploy from"
-  default     = "main"
-}
-
-variable "backend_port" {
-  type        = number
-  description = "Backend port"
-  default     = 5000
+  type    = string
+  default = "main"
 }
 
 variable "frontend_port" {
-  type        = number
-  description = "Frontend port"
-  default     = 80
+  type    = number
+  default = 80
 }
 
-variable "node_env" {
-  type        = string
-  description = "Node environment"
-  default     = "production"
-}
-
-variable "mongo_host" {
-  type        = string
-  description = "MongoDB host"
-  default     = "mongodb"
-}
-
-variable "mongo_port" {
-  type        = number
-  description = "MongoDB port"
-  default     = 27017
-}
-
-variable "mongo_db_name" {
-  type        = string
-  description = "MongoDB database name"
-  default     = "ecommerce"
-}
-
-variable "jwt_secret" {
-  type        = string
-  sensitive   = true
-  description = "JWT secret key"
-}
-
-variable "paypal_client_id" {
-  type        = string
-  sensitive   = true
-  description = "PayPal client ID"
+variable "backend_port" {
+  type    = number
+  default = 5000
 }
 
 variable "cloudbuild_sa" {
-  type        = string
-  description = "Cloud Build service account email"
+  type = string
+}
+
+variable "env_file_content" {
+  type      = string
+  sensitive = true
+  description = "Full .env file contents — change this per project in gcp.tfvars"
 }
