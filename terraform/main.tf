@@ -38,29 +38,29 @@ resource "google_compute_instance" "vm" {
       exec >> /var/log/startup.log 2>&1
       echo "[$(date)] Startup script begin"
 
+      # ── Install Docker ──────────────────────────────────
       apt-get update -y
       apt-get install -y ca-certificates curl gnupg git
-
       install -m 0755 -d /etc/apt/keyrings
       curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg
       chmod a+r /etc/apt/keyrings/docker.gpg
       echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu $(. /etc/os-release && echo $VERSION_CODENAME) stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null
-
       apt-get update -y
       apt-get install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin
-
       systemctl enable docker
       systemctl start docker
 
+      # ── Clone Repos ─────────────────────────────────────
       mkdir -p ${var.clone_dir}
       cd ${var.clone_dir}
-
       git clone https://github.com/${var.github_user}/${var.repo_deploy}.git
-      git clone https://github.com/HuXn-WebDev/${var.repo_app}.git
+      git clone https://github.com/${var.repo_app_owner}/${var.repo_app}.git
 
+      # ── Copy App Code into Deploy Folder ────────────────
       cp -r ${var.clone_dir}/${var.repo_app}/. ${var.app_dir}/backend/
       cp -r ${var.clone_dir}/${var.repo_app}/frontend/. ${var.app_dir}/frontend/
 
+      # ── Create .env ─────────────────────────────────────
       cat > ${var.app_dir}/.env << ENV
 PORT=${var.backend_port}
 MONGO_URI=mongodb://${var.mongo_host}:${var.mongo_port}/${var.mongo_db_name}
@@ -69,6 +69,7 @@ JWT_SECRET=${var.jwt_secret}
 PAYPAL_CLIENT_ID=${var.paypal_client_id}
 ENV
 
+      # ── Start App ───────────────────────────────────────
       cd ${var.app_dir}
       docker compose up --build -d
 

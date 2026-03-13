@@ -3,6 +3,11 @@ variable "project_id" {
   description = "GCP Project ID"
 }
 
+variable "project_number" {
+  type        = string
+  description = "GCP Project Number"
+}
+
 variable "region" {
   type        = string
   description = "GCP Region"
@@ -41,19 +46,24 @@ variable "disk_size" {
 
 variable "github_user" {
   type        = string
-  description = "GitHub username"
+  description = "YOUR GitHub username — owner of deploy repo"
+}
+
+variable "repo_deploy" {
+  type        = string
+  description = "YOUR deployment repo name"
+  default     = "mern-deploy"
+}
+
+variable "repo_app_owner" {
+  type        = string
+  description = "GitHub owner of the app repo"
 }
 
 variable "repo_app" {
   type        = string
   description = "App repo name"
   default     = "MERN-E-Commerce-Store"
-}
-
-variable "repo_deploy" {
-  type        = string
-  description = "Deployment repo name"
-  default     = "mern-deploy"
 }
 
 variable "app_dir" {
@@ -94,7 +104,7 @@ variable "node_env" {
 
 variable "mongo_host" {
   type        = string
-  description = "MongoDB host"
+  description = "MongoDB host — use container name for local Docker"
   default     = "mongodb"
 }
 
@@ -122,25 +132,7 @@ variable "paypal_client_id" {
   description = "PayPal client ID"
 }
 
-variable "cloudbuild_connection" {
-  type        = string
-  description = "Cloud Build connection name"
-  default     = "sanjay"
-}
-
-variable "cloudbuild_repo" {
-  type        = string
-  description = "Cloud Build linked repo name"
-  default     = "xD2-sky-mern-deploy"
-}
-
-variable "project_number" {
-  type        = string
-  description = "GCP Project Number"
-}
-
 variable "cloudbuild_sa" {
   type        = string
   description = "Cloud Build service account email"
-  default     = "cloudbuild-devops@project-ce0e81d5-7ca0-4de1-9e6.iam.gserviceaccount.com"
 }
