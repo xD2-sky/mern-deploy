@@ -84,27 +84,18 @@ ENV
 }
 
 resource "google_cloudbuild_trigger" "deploy_trigger" {
-  name     = "${var.vm_name}-deploy-trigger"
-  location = var.region
+  name            = "${var.vm_name}-deploy-trigger"
+  project         = var.project_id
+  location        = "global"
+  service_account = "projects/${var.project_id}/serviceAccounts/${var.cloudbuild_sa}"
 
-  repository_event_config {
-    repository = "projects/${var.project_id}/locations/${var.region}/connections/${var.cloudbuild_connection}/repositories/${var.cloudbuild_repo}"
+  github {
+    owner = var.github_user
+    name  = var.repo_deploy
     push {
       branch = "^${var.branch_name}$"
     }
   }
 
   filename = "cloudbuild.yaml"
-}
-
-resource "google_project_iam_member" "cloudbuild_iap" {
-  project = var.project_id
-  role    = "roles/iap.tunnelResourceAccessor"
-  member  = "serviceAccount:${var.project_number}@cloudbuild.gserviceaccount.com"
-}
-
-resource "google_project_iam_member" "cloudbuild_compute" {
-  project = var.project_id
-  role    = "roles/compute.osLogin"
-  member  = "serviceAccount:${var.project_number}@cloudbuild.gserviceaccount.com"
 }

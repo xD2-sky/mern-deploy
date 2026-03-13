@@ -138,3 +138,9 @@ variable "project_number" {
   type        = string
   description = "GCP Project Number"
 }
+
+variable "cloudbuild_sa" {
+  type        = string
+  description = "Cloud Build service account email"
+  default     = "cloudbuild-devops@project-ce0e81d5-7ca0-4de1-9e6.iam.gserviceaccount.com"
+}
