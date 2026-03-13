@@ -50,15 +50,10 @@ resource "google_compute_instance" "vm" {
       systemctl enable docker
       systemctl start docker
 
-      # ── Clone Repos ─────────────────────────────────────
+      # ── Clone Single Repo ───────────────────────────────
       mkdir -p ${var.clone_dir}
       cd ${var.clone_dir}
       git clone https://github.com/${var.github_user}/${var.repo_deploy}.git
-      git clone https://github.com/${var.repo_app_owner}/${var.repo_app}.git
-
-      # ── Copy App Code into Deploy Folder ────────────────
-      cp -r ${var.clone_dir}/${var.repo_app}/. ${var.app_dir}/backend/
-      cp -r ${var.clone_dir}/${var.repo_app}/frontend/. ${var.app_dir}/frontend/
 
       # ── Create .env ─────────────────────────────────────
       cat > ${var.app_dir}/.env << ENV

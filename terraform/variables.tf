@@ -46,24 +46,13 @@ variable "disk_size" {
 
 variable "github_user" {
   type        = string
-  description = "YOUR GitHub username — owner of deploy repo"
+  description = "YOUR GitHub username"
 }
 
 variable "repo_deploy" {
   type        = string
-  description = "YOUR deployment repo name"
+  description = "YOUR deployment repo name — contains app code + Dockerfiles"
   default     = "mern-deploy"
-}
-
-variable "repo_app_owner" {
-  type        = string
-  description = "GitHub owner of the app repo"
-}
-
-variable "repo_app" {
-  type        = string
-  description = "App repo name"
-  default     = "MERN-E-Commerce-Store"
 }
 
 variable "app_dir" {
@@ -104,7 +93,7 @@ variable "node_env" {
 
 variable "mongo_host" {
   type        = string
-  description = "MongoDB host — use container name for local Docker"
+  description = "MongoDB host"
   default     = "mongodb"
 }
 
